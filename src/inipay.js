@@ -2,6 +2,8 @@ import merge from "lodash/merge";
 import map from "lodash/map";
 import isEmpty from "lodash/isEmpty";
 import { sha256 } from "js-sha256";
+import sortBy from "lodash/sortBy";
+import qs from "qs";
 import {
   payList,
   defaultRequestDataFields,
@@ -37,13 +39,13 @@ class Inipay {
 
   initialize(formOptions) {
     this.setInipayURL();
-    this.initializeInipayScript();
+    this.setInipayScript();
     this.generateForm(formOptions);
   }
   /**
    * 이니시스 스크립트 초기화 함수
    */
-  initializeInipayScript() {
+  setInipayScript() {
     const script = document.createElement("script");
     script.src = this.url;
     script.charset = "utf-8";
@@ -52,6 +54,9 @@ class Inipay {
     document.querySelector("head").appendChild(script);
   }
 
+  /**
+   * 이니페이 URL 세팅 함수
+   */
   setInipayURL() {
     const { production } = this.config;
 
@@ -62,7 +67,7 @@ class Inipay {
 
   generateForm(options) {
     const { production } = this.config;
-    console.log("generateForm");
+
     const defaultOptions = {
       iframeSize: { width: "820px", height: "600px" },
       popup: true,
@@ -100,7 +105,7 @@ class Inipay {
       mKey,
       config: { version, target }
     } = this;
-    const { signature, oid, timestamp } = this.getProtectedFields(mid, price);
+    const { signature, oid, timestamp } = this._getProtectedFields(mid, price);
     const mergedFields = Object.assign({}, fields, {
       version,
       mid,
@@ -146,10 +151,10 @@ class Inipay {
     target.appendChild(this.form);
   }
 
-  getProtectedFields(mid, price) {
+  _getProtectedFields(mid, price) {
     const timestamp = this.getTimestamp();
     const oid = `${mid}_${timestamp}`;
-    const signature = this.makeSignature(oid, price, timestamp);
+    const signature = this.makeSignature({ oid, price, timestamp });
 
     return {
       timestamp,
@@ -188,13 +193,10 @@ class Inipay {
     this.form.appendChild(input);
   }
   /**
-   *
-   * @param 주문번호 oid
-   * @param 가격 price
-   * @param 타임스탬프 timestamp
+   * 이니페이 매뉴얼 기준 signature 생성시켜주는 함수
    */
-  makeSignature(oid, price, timestamp) {
-    return sha256(`oid=${oid}&price=${price}&timestamp=${timestamp}`);
+  makeSignature(params) {
+    return sha256(qs.stringify(params));
   }
 
   // makeSignature(authToken, timestamp) {
