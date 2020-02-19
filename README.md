@@ -22,15 +22,15 @@ inipay-js는 Javascript(Node.js) 환경에서 이니시스 결제모듈을 쉽�
 #### NPM
 
 ``` bash
-yarn add inipay
+yarn add inipay-js
 // or
-npm install --save inipay
+npm install --save inipay-js
 ```
 #### with Nuxt
 
 ```javascript
 // plugins/inipay.js
-import Inipay from 'inipay';
+import Inipay from 'inipay-js';
 
 export default function(ctx, inject) {
   inject('inipay', Inipay)
