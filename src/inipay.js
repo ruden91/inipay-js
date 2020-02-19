@@ -196,13 +196,14 @@ class Inipay {
    * 이니페이 매뉴얼 기준 signature 생성시켜주는 함수
    */
   makeSignature(params) {
-    console.log(qs.stringify(params));
-    return sha256(qs.stringify(params));
+    return sha256(
+      Object.keys(params)
+        .reduce((acc, curr) => {
+          return acc + `${curr}=${params[curr]}&`;
+        }, "")
+        .slice(0, -1)
+    );
   }
-
-  // makeSignature(authToken, timestamp) {
-  //   return sha256(`authToken=${authToken}&timestamp=${timestamp}`)
-  // }
 
   getTimestamp() {
     return Date.now();

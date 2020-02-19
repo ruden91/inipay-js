@@ -30,7 +30,22 @@ export default {
    ** Plugins to load before mounting the App
    */
   plugins: ["~/plugins/inipay"],
-  serverMiddleware: [bodyParser.urlencoded({ extended: false })],
+  serverMiddleware: [
+    bodyParser.urlencoded({
+      extended: false
+    }),
+    (req, res, next) => {
+      req.removeAllListeners("data");
+      req.removeAllListeners("end");
+      process.nextTick(() => {
+        if (req.body) {
+          req.emit("data", JSON.stringify(req.body));
+        }
+        req.emit("end");
+      });
+      next();
+    }
+  ],
   /*
    ** Nuxt.js dev-modules
    */
@@ -39,6 +54,10 @@ export default {
    ** Nuxt.js modules
    */
   modules: ["@nuxtjs/axios"],
+  axios: {
+    proxy: false,
+    proxyHeaders: false
+  },
   /*
    ** Build configuration
    */

@@ -21,11 +21,10 @@ export default {
         if (resultCode !== "0000" && resultCode !== "00") {
           throw new Error("이니페이 인증 실패");
         }
-
         const timestamp = Date.now();
         let authToken = `${post.authToken}`;
         cancelUrl = netCancelUrl;
-        authToken = authToken.replace(/\r|\n/g, "");
+        authToken = authToken.replace(/\r?\n|\r/g, "").trim();
         const signature = app.$inipay.makeSignature({
           authToken,
           timestamp
@@ -34,7 +33,6 @@ export default {
         // pc
         if (resultCode === "0000") {
           let { mid, authUrl, merchantData } = post;
-          console.log(merchantData);
           const params = {
             mid,
             authToken,
@@ -43,7 +41,6 @@ export default {
             charset: "UTF-8",
             format: "JSON"
           };
-          console.log(params);
 
           const res = await $axios.$post(authUrl, qs.stringify(params), {
             headers: {
